@@ -13,6 +13,10 @@
     background-color: #d3d3d3;
 }
 
-div {
-    border: 2px solid green;
+.current {
+    border: 1px solid black;
+}
+
+.card {
+    border: none;
 }
