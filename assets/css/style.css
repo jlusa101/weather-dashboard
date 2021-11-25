@@ -17,6 +17,19 @@
     border: 1px solid black;
 }
 
+button {
+    border: none;
+}
+
 .card {
     border: none;
 }
+
+.search-history {
+    list-style-type: none;
+}
+
+
+/* .card-group {
+    border: 1px solid green;
+} */
