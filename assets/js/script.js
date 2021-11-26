@@ -1,8 +1,11 @@
+// Constants
 const empty = "";
 const low = 3;
 const moderate = 8;
 const high = 11;
 const numOfElInCards = 25;
+
+// Variable declrations
 var todaysDate = moment().toDate();
 todaysDate = moment(todaysDate).format("DD/MM/YYYY");
 var currentWeather = document.querySelector("#current");
@@ -11,7 +14,9 @@ var searchList = document.querySelector(".search-history");
 var prevSearch = document.getElementById("prev-search");
 
 var searchId = 0;
+// Array to store objects
 var searchHistoryArray = [];
+// Object to store search history
 var searchHistoryObj = {
     history: "",
     id: ""
@@ -20,10 +25,10 @@ var searchHistoryObj = {
 // function that gets triggered when user clicks the search button
 $("#search-btn").click(function() {
 
+    // Retrieving user inputted city
     var searchCity = $("#user-search").val();
 
-    var geoLocationUrl = "https://geocode.search.hereapi.com/v1/geocode?q=" + searchCity + "&apiKey=mj4KYckuw8lalUVDqTRMUGr_21lA1l9lyXnpdHRvl7o";
-
+    // Only if user inputted something
     if (searchCity !== "") {
 
         // Adding the recent search to the search history
@@ -46,27 +51,31 @@ $("#search-btn").click(function() {
         // Clearing the search input after every search
         $("#user-search").val(empty);
 
-        getcityCoord(geoLocationUrl, searchCity);
+        // Retrieving coordinates based on the user inputted city
+        getcityCoord(searchCity);
     }
 
-
+    return;
 });
 
 
 
-// Function that creates a search history that displays on the website
+// Function that creates a search history that displays on the website as a button
 var searchHistory = function(search) {
     var newBtnEl = document.createElement("button");
-    newBtnEl.classList = "btn-sm btn-block list-group-item-dark mb-2";
+    // Adding an event listener to each button to be able to search again
+    newBtnEl.addEventListener("click", searchCityAgain, false);
     newBtnEl.setAttribute("type", "button");
-    newBtnEl.id = "prev-search";
+    newBtnEl.classList = "btn2 btn-sm btn-block list-group-item-dark mb-2";
+    newBtnEl.setAttribute("value", search);
     newBtnEl.textContent = search;
     searchList.appendChild(newBtnEl);
     return;
 }
 
-var getcityCoord = function(geoLocationUrl, searchCity) {
-
+// Function that retrieves latitude and longitude
+var getcityCoord = function(searchCity) {
+    var geoLocationUrl = "https://geocode.search.hereapi.com/v1/geocode?q=" + searchCity + "&apiKey=mj4KYckuw8lalUVDqTRMUGr_21lA1l9lyXnpdHRvl7o";
     // Fetching the geo location of the entered city
     fetch(geoLocationUrl).then(function(response) {
             if (response.ok) {
@@ -81,10 +90,11 @@ var getcityCoord = function(geoLocationUrl, searchCity) {
         })
         .catch(function(error) {
 
-            alert("Unable to connect to GeoCode");
+            console.log(error);
         })
 }
 
+// Function that retrieves weather information based on the geographic coordinates
 var getCurrentWeather = function(search, data) {
 
     var weatherApiUrl = "https://api.openweathermap.org/data/2.5/onecall?lat=" + data.items[0].position.lat + "&lon=" + (data.items[0].position.lng) + "&units=metric&appid=229ca32802b237bb05e7ab6cfdfacd0c";
@@ -100,8 +110,10 @@ var getCurrentWeather = function(search, data) {
         })
         .catch(function(error) {
 
-            alert("Unable to connect to OpenWeather");
+            console.log(error);
         })
+
+    return;
 }
 
 
@@ -208,34 +220,52 @@ var addCurrWeathertoSite = function(city, data) {
     return;
 }
 
+// Function that saves data into the local storage
 var saveHistory = function() {
     localStorage.setItem("search-history", JSON.stringify(searchHistoryArray));
 }
 
+// Function that gets called when the page loads. This loads previously searched cities
+// and places them on the site
 var loadHistory = function() {
+    // Accessing local storage to retrieve data
     var savedSearch = localStorage.getItem("search-history");
+
+    // Parsing the object data
     savedSearch = JSON.parse(savedSearch);
+
+    // if no data, exit function
     if (savedSearch == null) {
         return;
     }
+
+    // Looping through the array and retrieve pertinent data
     for (var i = 0; i < savedSearch.length; i++) {
-        searchHistory(savedSearch[i].history);
+        // Setting the local searchId to match the previous data
         searchId = savedSearch[i].id;
 
+        // Saving the data 
         searchHistoryObj = {
             history: savedSearch[i].history,
             id: savedSearch[i].id
         }
 
+        // Pushing the search objects to the array
         searchHistoryArray.push(searchHistoryObj);
 
+        // Creating the search history
+        searchHistory(savedSearch[i].history);
     }
 
+    // Incrementing searchId to be a new number for a new entry
     searchId++;
 }
 
+// Function that gets executed when user clicks on one of the previously searched buttons
+var searchCityAgain = function() {
+    var searchedCity = $(this).val();
+    getcityCoord(searchedCity);
+}
 
-
-
-
+// Loading any previous searches
 loadHistory();
