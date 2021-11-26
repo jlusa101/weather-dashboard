@@ -17,18 +17,16 @@
     border: 1px solid black;
 }
 
+.search-history {
+    list-style-type: none;
+}
+
 button {
     border: none;
 }
 
 .card {
+    margin-left: -15px;
+    margin-right: 10px;
     border: none;
-}
-
-.search-history {
-    list-style-type: none;
-}
-
-.card-group {
-    border: 1px solid green;
 }
