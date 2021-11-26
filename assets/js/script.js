@@ -8,11 +8,13 @@ todaysDate = moment(todaysDate).format("DD/MM/YYYY");
 var currentWeather = document.querySelector("#current");
 var searchList = document.querySelector(".search-history");
 
+var prevSearch = document.getElementById("prev-search");
+
 var searchId = 0;
 var searchHistoryArray = [];
 var searchHistoryObj = {
     history: "",
-    id: "",
+    id: ""
 }
 
 // function that gets triggered when user clicks the search button
@@ -27,38 +29,60 @@ $("#search-btn").click(function() {
         // Adding the recent search to the search history
         searchHistory(searchCity);
 
-        // searchHistoryObj.history = searchCity;
-        // searchHistoryObj.id = searchId;
-        // searchHistoryArray.push(searchHistoryObj);
-        // searchId++;
-        // saveHistory();
+        searchHistoryObj = {
+            history: searchCity,
+            id: searchId
+        }
 
+        // Pushing the current search object to the array
+        searchHistoryArray.push(searchHistoryObj);
+
+        // Incrementing the searchId for the next search
+        searchId++;
+
+        // Saving the search history in local storage
+        saveHistory();
+
+        // Clearing the search input after every search
         $("#user-search").val(empty);
-        fetch(geoLocationUrl).then(function(response) {
-                if (response.ok) {
 
-                    response.json().then(function(data) {
-                        getCurrentWeather(searchCity, data);
-                        return;
-                    })
-                }
-
-            })
-            .catch(function(error) {
-
-                alert("Unable to connect to GeoCode");
-            })
+        getcityCoord(geoLocationUrl, searchCity);
     }
 
 
 });
 
+
+
+// Function that creates a search history that displays on the website
 var searchHistory = function(search) {
     var newBtnEl = document.createElement("button");
     newBtnEl.classList = "btn-sm btn-block list-group-item-dark mb-2";
+    newBtnEl.setAttribute("type", "button");
+    newBtnEl.id = "prev-search";
     newBtnEl.textContent = search;
     searchList.appendChild(newBtnEl);
     return;
+}
+
+var getcityCoord = function(geoLocationUrl, searchCity) {
+
+    // Fetching the geo location of the entered city
+    fetch(geoLocationUrl).then(function(response) {
+            if (response.ok) {
+
+                response.json().then(function(data) {
+                    // Calling a function to get weather data
+                    getCurrentWeather(searchCity, data);
+                    return;
+                })
+            }
+
+        })
+        .catch(function(error) {
+
+            alert("Unable to connect to GeoCode");
+        })
 }
 
 var getCurrentWeather = function(search, data) {
@@ -68,9 +92,8 @@ var getCurrentWeather = function(search, data) {
             if (response.ok) {
                 response.json().then(function(data) {
                     addCurrWeathertoSite(search, data);
+                    return;
                 })
-
-                return;
 
             }
 
@@ -117,9 +140,10 @@ var addCurrWeathertoSite = function(city, data) {
     newContainer.appendChild(humEl);
 
     var uviEl = document.createElement("p");
-
     uviEl.textContent = "UV Index: ";
+
     var spanEl = document.createElement("span");
+    // Ensuring that depending on the UV index, the background reflects what the index is
     if (data.current.uvi >= 0 && data.current.uvi < low) {
         spanEl.setAttribute("style", "color: white; padding: 5px 10px 5px 10px; background-color: green");
     } else if (data.current.uvi >= low && data.current.uvi < moderate) {
@@ -133,12 +157,14 @@ var addCurrWeathertoSite = function(city, data) {
     uviEl.appendChild(spanEl);
     newContainer.appendChild(uviEl);
 
+    // Clearing old information if present
     if (document.querySelector("#future-data")) {
         for (var j = 0; j < numOfElInCards; j++) {
             document.querySelector("#future-data").remove();
         }
     }
 
+    // Creating the elements and appending the data for the 5-day forecast
     for (var i = 1; i < 6; i++) {
 
         var card = document.querySelector("#f-date-" + i);
@@ -148,18 +174,23 @@ var addCurrWeathertoSite = function(city, data) {
 
         card.setAttribute("style", "background-color:#000067; color: #f0f0ff");
 
+        // Adding the weather icon that came with the fetch request, to be shown the user
         var futImg = document.createElement("img");
         var futIcon = data.daily[i - 1].weather[0].icon;
+        // Creating the img source link
         var futIconUrl = "http://openweathermap.org/img/wn/" + futIcon + ".png";
+        // Adding the url as a source attribute
         futImg.setAttribute("src", futIconUrl);
         futImg.setAttribute("alt", "Weather Icon");
         futImg.setAttribute("id", "future-data");
 
         var futTemp = document.createElement("p");
+        // Rounding the temperature to the closest whole number
         futTemp.textContent = "Temp: " + Math.round(data.daily[i - 1].temp.day) + " ℃";
         futTemp.setAttribute("id", "future-data");
 
         var futWind = document.createElement("p");
+        // Converting the standard metre/sec to kilometer/hour
         futWind.textContent = "Wind: " + Math.round((data.daily[i - 1].wind_speed * 3.6)) + " km/h";
         futWind.setAttribute("id", "future-data");
 
@@ -173,8 +204,38 @@ var addCurrWeathertoSite = function(city, data) {
         card.appendChild(futWind);
         card.appendChild(futHumidity);
     }
+
+    return;
 }
 
 var saveHistory = function() {
     localStorage.setItem("search-history", JSON.stringify(searchHistoryArray));
 }
+
+var loadHistory = function() {
+    var savedSearch = localStorage.getItem("search-history");
+    savedSearch = JSON.parse(savedSearch);
+    if (savedSearch == null) {
+        return;
+    }
+    for (var i = 0; i < savedSearch.length; i++) {
+        searchHistory(savedSearch[i].history);
+        searchId = savedSearch[i].id;
+
+        searchHistoryObj = {
+            history: savedSearch[i].history,
+            id: savedSearch[i].id
+        }
+
+        searchHistoryArray.push(searchHistoryObj);
+
+    }
+
+    searchId++;
+}
+
+
+
+
+
+loadHistory();
