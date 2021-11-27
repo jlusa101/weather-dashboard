@@ -97,9 +97,11 @@ var getcityCoord = function(searchCity) {
 // Function that retrieves weather information based on the geographic coordinates
 var getCurrentWeather = function(search, data) {
 
+    // Creating an request url
     var weatherApiUrl = "https://api.openweathermap.org/data/2.5/onecall?lat=" + data.items[0].position.lat + "&lon=" + (data.items[0].position.lng) + "&units=metric&appid=229ca32802b237bb05e7ab6cfdfacd0c";
     fetch(weatherApiUrl).then(function(response) {
             if (response.ok) {
+                // If response ok, begin building html elements
                 response.json().then(function(data) {
                     addCurrWeathertoSite(search, data);
                     return;
@@ -116,21 +118,25 @@ var getCurrentWeather = function(search, data) {
     return;
 }
 
-
+// Function that creates html elements and populates with weather data
 var addCurrWeathertoSite = function(city, data) {
 
+    // Checking if an element with id holder exists and if it does, remove it
     if (document.getElementById("holder")) {
         document.getElementById("holder").remove();
     }
 
+    // Creating a new container to hold all the created elements
     var newContainer = document.createElement("div");
     newContainer.setAttribute("id", "holder");
     currentWeather.appendChild(newContainer);
 
+    // Creating a header
     var headerEl = document.createElement("h3");
     headerEl.textContent = city + " (" + todaysDate + ")";
     newContainer.appendChild(headerEl);
 
+    // Creating an img element to hold weather icon
     var iconCode = data.current.weather[0].icon;
     var iconUrl = "http://openweathermap.org/img/wn/" + iconCode + ".png";
     var imgEl = document.createElement("img");
@@ -138,22 +144,26 @@ var addCurrWeathertoSite = function(city, data) {
     imgEl.setAttribute("alt", "Weather Icon");
     headerEl.appendChild(imgEl);
 
+    // Creating a variable to hold a p element that shows temperature
     var tempEL = document.createElement("p");
     tempEL.textContent = "Temp: " + Math.round(data.current.temp) + " ℃";
-
     newContainer.appendChild(tempEL);
 
+    // Creating a variable to hold a p element that shows wind speed in km/h
     var windEl = document.createElement("p");
     windEl.textContent = "Wind: " + Math.round((data.current.wind_speed * 3.6)) + " km/h";
     newContainer.appendChild(windEl);
 
+    // Creating a variable to hold a p element that shows humdidty
     var humEl = document.createElement("p");
     humEl.textContent = "Humidity: " + data.current.humidity + " %";
     newContainer.appendChild(humEl);
 
+    // Creating a variable to hold a p element that shows UV index
     var uviEl = document.createElement("p");
     uviEl.textContent = "UV Index: ";
 
+    // Span element that has a specific background color depending on the index
     var spanEl = document.createElement("span");
     // Ensuring that depending on the UV index, the background reflects what the index is
     if (data.current.uvi >= 0 && data.current.uvi < low) {
@@ -164,6 +174,7 @@ var addCurrWeathertoSite = function(city, data) {
         spanEl.setAttribute("style", "color: white; padding: 5px 10px 5px 10px; background-color: red");
     }
 
+    // Making the span element have rounded edges
     spanEl.className = "rounded-lg";
     spanEl.textContent = data.current.uvi;
     uviEl.appendChild(spanEl);
@@ -179,11 +190,13 @@ var addCurrWeathertoSite = function(city, data) {
     // Creating the elements and appending the data for the 5-day forecast
     for (var i = 1; i < 6; i++) {
 
+        // Querying for the card id
         var card = document.querySelector("#f-date-" + i);
         var futureDate = document.createElement("h4");
         futureDate.setAttribute("id", "future-data");
         futureDate.textContent = moment().add(i, 'days').format("DD/MM/YYYY");
 
+        // Setting up the card attributes, background and font color
         card.setAttribute("style", "background-color:#000067; color: #f0f0ff");
 
         // Adding the weather icon that came with the fetch request, to be shown the user
@@ -210,6 +223,7 @@ var addCurrWeathertoSite = function(city, data) {
         futHumidity.textContent = "Humidity: " + data.daily[i - 1].humidity + " %";
         futHumidity.setAttribute("id", "future-data");
 
+        // Appending all newly created elements to the card
         card.appendChild(futureDate);
         card.appendChild(futImg);
         card.appendChild(futTemp);
