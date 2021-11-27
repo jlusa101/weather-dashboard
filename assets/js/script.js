@@ -138,7 +138,7 @@ var addCurrWeathertoSite = function(city, data) {
 
     // Creating an img element to hold weather icon
     var iconCode = data.current.weather[0].icon;
-    var iconUrl = "http://openweathermap.org/img/wn/" + iconCode + ".png";
+    var iconUrl = "https://openweathermap.org/img/wn/" + iconCode + ".png";
     var imgEl = document.createElement("img");
     imgEl.setAttribute("src", iconUrl);
     imgEl.setAttribute("alt", "Weather Icon");
@@ -203,7 +203,7 @@ var addCurrWeathertoSite = function(city, data) {
         var futImg = document.createElement("img");
         var futIcon = data.daily[i - 1].weather[0].icon;
         // Creating the img source link
-        var futIconUrl = "http://openweathermap.org/img/wn/" + futIcon + ".png";
+        var futIconUrl = "https://openweathermap.org/img/wn/" + futIcon + ".png";
         // Adding the url as a source attribute
         futImg.setAttribute("src", futIconUrl);
         futImg.setAttribute("alt", "Weather Icon");
