@@ -197,7 +197,7 @@ var addCurrWeathertoSite = function(city, data) {
         futureDate.textContent = moment().add(i, 'days').format("DD/MM/YYYY");
 
         // Setting up the card attributes, background and font color
-        card.setAttribute("style", "background-color:#000067; color: #f0f0ff");
+        card.setAttribute("style", "background-color:#6699cc; color: #f0f0ff");
 
         // Adding the weather icon that came with the fetch request, to be shown the user
         var futImg = document.createElement("img");
